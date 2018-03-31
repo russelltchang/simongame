@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">  
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> <!--This needs to be above jQuery-->
+<script src="https://use.fontawesome.com/releases/v5.0.8/js/all.js"></script>
+    
+<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+
+<style> 
+@import url('https://fonts.googleapis.com/css?family=Alfa+Slab+One|VT323|Oswald');
+
+    body {
+        background-image: url('http://cdn.backgroundhost.com/backgrounds/subtlepatterns/purty_wood.png');
+    }
+    
+    .container-fluid {
+        display: flex;
+        justify-content: center;    
+        align-items: center;
+    }
+    
+    .jumbotron {
+        background-color: #333;
+        height: 460px;
+        width: 460px;
+        border-radius: 300px;
+        margin-top: 40px;
+        box-shadow: 0px 0px 12px #222;
+        display: flex;              /* this and below for centering panels */
+        justify-content: center;    /* tutorialzine.com */
+        align-items: center;
+        position: relative;
+    }
+    
+    .smallCircle {
+        background-color: #ECE7EE;
+        height: 230px;
+        width: 230px;
+        border-radius: 200px;
+        text-align: center; /* this is parent div. centers onoff button and Simon */
+        position: relative;
+        border: 10px solid #333;
+        z-index: 2;
+    }
+    
+    .panels {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .panel {
+        border: 10px solid #333;
+    }
+    
+    #lawngreen {
+        border-top-left-radius: 100%;
+        height: 220px;
+        width: 220px;
+        background-color: #00a74a;
+    }
+    
+    #red {
+        border-top-right-radius: 100%;
+        height: 220px;
+        width: 220px;
+        background-color: #9f0f17;
+    }
+    
+    #blue {
+        border-bottom-left-radius: 100%;
+        height: 220px;
+        width: 220px;
+        background-color: #094a8f;
+    }
+    
+    #yellow {
+        border-bottom-right-radius: 100%;
+        height: 220px;
+        width: 220px;
+        background-color: #cca707;
+    }
+    
+    .top, .bottom {
+        display: flex;
+        justify-content: center;    
+        align-items: center;
+    }
+    
+    .top {
+        margin-top: -480px;
+    }
+    
+    h1 {
+        font-family: 'Alfa Slab One';
+        font-size: 300%;
+        margin-top: 30px;
+    }
+    
+    .settings {
+        display: flex;
+        justify-content: center;    
+        align-items: center;
+        z-index: 3;
+    }
+    
+    .countbox {
+        background-color: #430710;
+        height: 40px;
+        width: 55px;
+        border-radius: 10px;  
+        display: flex;
+        justify-content: center;    
+        align-items: center;
+    }
+    
+    .number {
+        font-family: 'VT323';
+        color: #DC0D29;
+        font-size: 200%;
+        cursor: default;
+    }
+    
+    .startbutton {
+        background-color: red;
+        border-radius: 100px;
+        height: 25px; 
+        width: 25px;
+        border: 3px solid #333;
+        margin-top: 15px;
+        cursor: pointer;
+        box-shadow: 0px 1px 1px #333;
+    }
+
+    .strictlight {
+        border-radius: 200px;
+        height: 10px;
+        width: 10px;
+        background-color: black;
+        margin-left: 8px;
+        border: 2px solid black;
+    }
+    
+    .strictbutton {
+        background-color: yellow;
+        border-radius: 100px;
+        height: 25px;
+        width: 25px;
+        border: 3px solid #333;
+        margin-top: 5px;
+        cursor: pointer;
+        box-shadow: 0px 1px 1px #333;
+    }
+    
+    .countlabel, .startlabel, .strictlabel, .offlabel, .onlabel {
+        font-family: 'Oswald';
+        font-size: 75%;
+    }
+    
+    .count, .start, .strict {
+        margin-left: 10px;
+        margin-right: 15px;
+    }
+    
+    .onoff {
+        display: flex;
+        justify-content: center;    
+        align-items: center;
+    }
+    
+    .switch {
+        position: relative;
+        height: 18px;
+        width: 40px;
+    }
+
+    .switch input {display:none;}
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #222;
+        border-radius: 2px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 14px;
+        width: 18px;
+        left: 2px;
+        bottom: 2px;
+        background-color: #3193DE;
+        border-radius: 3px black;
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(18px);
+    }
+</style>
+    
+<script>
+
+var sequence = [];
+var colors = ["red", "yellow", "blue", "lawngreen"];
+var origColors = ['#9f0f17', '#cca707', '#094a8f', '#00a74a'];
+var strictFlag = true;
+var panelFlag = true;
+var turnIndex = 0;   
+var onOffFlag = "off";
+
+function onOff() {
+    var number = document.getElementsByClassName('number')[0];
+    var startbutton = document.getElementsByClassName('startbutton')[0];
+    var strictbutton = document.getElementsByClassName('strictbutton')[0];
+    
+    if (onOffFlag === "off") {
+        onOffFlag = "on";
+        number.innerHTML = "--";
+        startbutton.removeEventListener('click', startGame);
+        strictbutton.removeEventListener('click', strictMode);
+        startbutton.addEventListener('click', startGame);
+        strictbutton.addEventListener('click', strictMode);
+    } else if (onOffFlag === "on") {
+        onOffFlag = "off";
+        sequence = [];
+        number.innerHTML = "";
+        startbutton.removeEventListener('click', startGame);
+        strictbutton.removeEventListener('click', strictMode);
+    }
+}
+    
+function startGame() {
+    turnIndex = 0;
+    sequence = [];
+    var number = document.getElementsByClassName('number')[0];
+    var timesRun = 0;
+    number.innerHTML = "--";
+    var interval = setInterval(function() {
+        timesRun++;
+        if (timesRun === 4) {
+            clearInterval(interval);
+        }
+        number.style.visibility = (number.style.visibility == "" ? "hidden" : "");
+    }, 300);
+    var interval2 = setTimeout(function() {
+        number.innerHTML = '01';
+        simonTurn();
+    }, 1500);
+}    
+
+function simonTurn() {
+    var randomColor = colors[Math.floor(Math.random()*colors.length)];
+    var randomColorID = randomColor + 'Sound'; 
+    if (sequence.length < 1) {
+        document.getElementById(randomColorID).load();
+        document.getElementById(randomColorID).play();
+        sequence.push(randomColor);
+        changeColor(randomColor);
+    } else {
+        sequence.push(randomColor);
+        function timeOut(i) {
+            setTimeout(function() {
+                var colorID = sequence[i] + 'Sound';
+                document.getElementById(colorID).load();
+                document.getElementById(colorID).play();
+                changeColor(sequence[i]);
+            }, (i+1)*800);
+        }
+        for (i=0;i<sequence.length;i++) {
+            timeOut(i);
+        }
+    }
+    var panels = document.getElementsByClassName('panel');
+    for (i=0;i<panels.length;i++) {
+        panels[i].removeEventListener('click', playerTurn);
+        panels[i].addEventListener('click', playerTurn);
+    }
+}
+    
+function changeColor(color) {
+    var runCount = 0;
+    var panel = document.getElementById(color);
+    var interval = setTimeout(function() {
+        if (panelFlag) {
+            panel.style.backgroundColor = colors[colors.indexOf(color)];
+            panelFlag = false;
+        } else {
+            panel.style.backgroundColor = origColors[colors.indexOf(color)];
+            panelFlag = true;
+        }
+    }, 0);
+    var interval2 = setTimeout(function() {
+        if (panelFlag) {
+            panel.style.backgroundColor = colors[colors.indexOf(color)];
+            panelFlag = false;
+        } else {
+            panel.style.backgroundColor = origColors[colors.indexOf(color)];
+            panelFlag = true;
+        }
+    }, 400);
+}
+
+function playerTurn() {
+    if (event.target.id === sequence.slice(turnIndex)[0]) {
+        var number = document.getElementsByClassName('number')[0];
+        var panel = document.getElementById(event.target.id);
+        var colorID = event.target.id + 'Sound';
+        changeColor(event.target.id);
+        document.getElementById(colorID).load();
+        document.getElementById(colorID).play();
+        if (turnIndex === sequence.length-1) {
+            if (sequence.length === 15) {
+                number.innerHTML = "Win!";
+            } else {
+                setTimeout(function() {
+                    turnIndex = 0;
+                    number.innerHTML = '0' + String(sequence.length+1);
+                    simonTurn();
+                }, 2000);
+            }
+        } else {
+            turnIndex++;
+            var panels = document.getElementsByClassName('panel');
+            for (i=0;i<panels.length;i++) {
+                panels[i].removeEventListener('click', playerTurn);
+                panels[i].addEventListener('click', playerTurn);
+            }
+        }
+    } else if (event.target.id !== sequence.slice(turnIndex)[0] && strictFlag === false) {
+        var number = document.getElementsByClassName('number')[0];
+        var timesRun = 0;
+        number.innerHTML = "!!";
+        document.getElementById('wrong').load();
+        document.getElementById('wrong').play();
+        var interval = setInterval(function() {
+            timesRun++;
+            if (timesRun === 4) {
+                clearInterval(interval);
+            }
+        number.style.visibility = (number.style.visibility == "" ? "hidden" : "");
+        }, 300);
+        var interval2 = setTimeout(function() {
+            startGame();
+        }, 2000);
+    } else if (event.target.id !== sequence.slice(turnIndex)[0] && strictFlag === true) {
+        var number = document.getElementsByClassName('number')[0];
+        var timesRun = 0;
+        document.getElementById('wrong').load();
+        document.getElementById('wrong').play();
+        number.innerHTML = "!!";
+        var interval = setInterval(function() {
+            timesRun++;
+            if (timesRun === 4) {
+                clearInterval(interval);
+            }
+        number.style.visibility = (number.style.visibility == "" ? "hidden" : "");
+        }, 300);
+        var interval2 = setTimeout(function() {
+            function timeOut(i) {
+                setTimeout(function() {
+                    var colorID = sequence[i] + 'Sound';
+                    document.getElementById(colorID).load();
+                    document.getElementById(colorID).play();
+                    changeColor(sequence[i]);
+                }, i*800);
+            }
+            for (i=1;i<sequence.length+1;i++) {
+                timeOut(i-1);
+            }
+        }, 1500);
+        var panels = document.getElementsByClassName('panel');
+        for (i=0;i<panels.length;i++) {
+            panels[i].addEventListener('click', playerTurn);
+        }
+    }
+}
+
+function strictMode() {
+    var strictlight = document.getElementsByClassName('strictlight')[0];
+    if (strictFlag) {
+        strictFlag = false;
+        strictlight.style.backgroundColor = "red";
+        return true;
+    } else {
+        strictFlag = true;
+        strictlight.style.backgroundColor = "black";
+        return false;
+    }
+}    
+
+    
+</script>  
+</head>
+
+<body>	
+  <div class="container-fluid">
+    <div class="jumbotron">
+      <div class="smallCircle">
+        <h1>Simon</h1>
+        <div class="settings">
+          <div class="count">
+            <div class="countbox">
+              <div class="number"></div>
+            </div>
+            <p class="countlabel">COUNT</p> 
+          </div>
+          <div class="start">
+            <div class="startbutton"></div>
+            <p class="startlabel">START</p>
+          </div>
+          <div class="strict">
+            <div class="strictlight"></div>
+            <div class="strictbutton"></div>  
+            <p class="strictlabel">STRICT</p>
+          </div>
+       </div>
+       <div class="onoff">
+          <p class="offlabel" style="margin-right:4px; margin-top: 7px">OFF</p>
+          <label class="switch">
+            <input type="checkbox">
+            <div class="slider" onclick="onOff()"></div>
+          </label>  
+          <p class="onlabel" style="margin-left:4px; margin-top: 7px">ON</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="panels">    
+    <div class="top">
+      <div class="panel" id="lawngreen"></div>
+      <div class="panel" id="red"></div>
+    </div>
+    <div class="bottom">
+      <div class="panel" id="blue"></div>
+      <div class="panel" id="yellow"></div>
+    </div>
+  </div>
+    
+    <audio id="lawngreenSound" src="green.mp3"></audio>
+    <audio id="blueSound" src="blue.mp3"></audio>
+    <audio id="redSound" src="red.mp3"></audio>
+    <audio id="yellowSound" src="yellow.mp3"></audio>
+    <audio id="wrong" src="wrong.mp3"></audio>
+    
+    
+</body>
+</html>
+
